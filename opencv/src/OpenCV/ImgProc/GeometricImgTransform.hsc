@@ -502,7 +502,7 @@ remapImg
             (depth    :: *  )
    . (Mat ('S ['S height, 'S width]) ('S channels) ('S depth) ~ Kodak_512x341)
   => Mat ('S ['S height, 'S width]) ('S channels) ('S depth)
-remapImg = exceptError $ remap birds_512x341 transform InterLinear (BorderConstant black)
+remapImg = exceptError $ remap birds_512x341 transform transform InterLinear (BorderConstant black)
   where
     transform = exceptError $
                 matFromFunc (Proxy :: Proxy [height, width])
@@ -534,24 +534,27 @@ remap
        -- ^ Source image.
     -> Mat ('S [outputHeight, outputWidth]) ('S 2) ('S Float)
        -- ^ A map of @(x, y)@ points.
+    -> Mat ('S [outputHeight, outputWidth]) ('S 2) ('S Float)
+       -- ^ A map of @(x, y)@ points.
     -> InterpolationMethod
        -- ^ Interpolation method to use. Note that 'InterArea' is not
        -- supported by this function.
     -> BorderMode
     -> m (Mat ('S [outputHeight, outputWidth]) inputChannels inputDepth)
-remap src mapping interpolationMethod borderMode = unsafeWrapException $ do
+remap src map1 map2 interpolationMethod borderMode = unsafeWrapException $ do
     dst <- newEmptyMat
     handleCvException (pure $ unsafeCoerceMat dst) $
       withPtr src $ \srcPtr ->
       withPtr dst $ \dstPtr ->
-      withPtr mapping $ \mappingPtr ->
+      withPtr map1 $ \map1Ptr ->
+      withPtr map2 $ \map2Ptr ->
       withPtr borderValue $ \borderValuePtr ->
         [cvExcept|
           cv::remap
             ( *$(Mat * srcPtr)
             , *$(Mat * dstPtr)
-            , *$(Mat * mappingPtr)
-            , {}
+            , *$(Mat * map1Ptr)
+            , *$(Mat * map2Ptr)
             , $(int32_t c'interpolation)
             , $(int32_t c'borderMode)
             , *$(Scalar * borderValuePtr)

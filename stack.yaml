@@ -1,4 +1,5 @@
-resolver: nightly-2018-06-08
+resolver: lts-12.10
+
 packages:
 - opencv/
 - opencv-examples/
@@ -10,12 +11,15 @@ allow-newer: true
 extra-lib-dirs:
 - /usr/local/lib
 
+extra-deps:
+  - inline-c-cpp-0.2.2.1
+
 nix:
   path: [ "nixpkgs=https://github.com/NixOS/nixpkgs/archive/4ccaa7de8eb34a0bb140f109a0e88095480118eb.tar.gz" ]
   packages: [ zlib pkgconfig opencv3 ]
 
 # Uncomment if you wish to use Docker integration
 # See README.md for further information.
-#docker:
-#  image: stack-build:lts-10.2-opencv
-#  stack-exe: image
+# docker:
+#   image: stack-build:lts-12.10-opencv
+#   stack-exe: image
